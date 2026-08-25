@@ -72,6 +72,18 @@ public sealed class LanguageModel
         return new Prediction(Softmax(scores));
     }
 
+
+    public Vector GetInputEmbedding(int tokenId)
+    {
+        ValidateTokenId(tokenId);
+        return _inputEmbeddings[tokenId];
+    }
+
+    public Vector GetOutputEmbedding(int tokenId)
+    {
+        ValidateTokenId(tokenId);
+        return _outputEmbeddings[tokenId];
+    }
     private void ValidateTokenId(int tokenId)
     {
         if ((uint)tokenId >= (uint)_vocabulary.Count)
@@ -134,3 +146,4 @@ public sealed class LanguageModel
         return exponentials;
     }
 }
+
