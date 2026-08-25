@@ -19,6 +19,17 @@ public sealed class TrainingData
 
     public IReadOnlyList<string> Sentences { get; }
 
+    public static IReadOnlyList<string> LoadSentences(
+        string path)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(path);
+
+        var json = File.ReadAllText(path);
+
+        return JsonSerializer.Deserialize<List<string>>(json)
+            ?? throw new InvalidOperationException(
+                "Sentence data could not be loaded.");
+    }
     public static TrainingData Load(
         string vocabularyPath,
         string corpusPath)
@@ -46,3 +57,4 @@ public sealed class TrainingData
             sentences);
     }
 }
+

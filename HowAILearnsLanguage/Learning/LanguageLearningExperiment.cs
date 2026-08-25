@@ -2,6 +2,11 @@
 
 namespace HowAILearnsLanguage.Learning;
 
+public sealed record LanguageLearningResult(
+    LanguageModel Model,
+    EmbeddingSnapshot InitialEmbeddings,
+    IReadOnlyList<TrainingResult> History);
+
 public sealed class LanguageLearningExperiment
 {
     private readonly Vocabulary _vocabulary;
@@ -18,7 +23,7 @@ public sealed class LanguageLearningExperiment
             throw new ArgumentNullException(nameof(corpus));
     }
 
-    public IReadOnlyList<TrainingResult> Run(
+    public LanguageLearningResult Run(
         int embeddingDimension,
         int contextRadius,
         int epochs,
@@ -38,6 +43,9 @@ public sealed class LanguageLearningExperiment
                 embeddingDimension,
                 seed);
 
+        var initialEmbeddings =
+            EmbeddingSnapshot.Capture(model);
+
         var trainer =
             new Trainer(
                 model,
@@ -46,8 +54,14 @@ public sealed class LanguageLearningExperiment
                 new GradientDescentOptimizer(
                     learningRate));
 
-        return trainer.Train(
-            examples,
-            epochs);
+        var history =
+            trainer.Train(
+                examples,
+                epochs);
+
+        return new LanguageLearningResult(
+            model,
+            initialEmbeddings,
+            history);
     }
 }

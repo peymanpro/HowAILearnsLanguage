@@ -25,7 +25,7 @@ public class LanguageLearningExperimentTests
                 vocabulary,
                 corpus);
 
-        var history =
+        var result =
             experiment.Run(
                 embeddingDimension: 8,
                 contextRadius: 1,
@@ -33,9 +33,46 @@ public class LanguageLearningExperimentTests
                 learningRate: 0.1,
                 seed: 42);
 
+        Assert.Equal(
+            20,
+            result.History.Count);
+
         Assert.True(
-            history[^1].AverageLoss <
-            history[0].AverageLoss);
+            result.History[^1].AverageLoss <
+            result.History[0].AverageLoss);
+    }
+
+    [Fact]
+    public void Experiment_should_return_trained_model_and_initial_snapshot()
+    {
+        var vocabulary =
+            CreateVocabulary();
+
+        var corpus =
+            new TrainingCorpus();
+
+        corpus.Add(
+            "The cat drinks milk.");
+
+        var experiment =
+            new LanguageLearningExperiment(
+                vocabulary,
+                corpus);
+
+        var result =
+            experiment.Run(
+                embeddingDimension: 8,
+                contextRadius: 1,
+                epochs: 5,
+                learningRate: 0.1,
+                seed: 42);
+
+        Assert.NotNull(result.Model);
+        Assert.NotNull(result.InitialEmbeddings);
+
+        Assert.Equal(
+            vocabulary.Count,
+            result.Model.VocabularySize);
     }
 
     private static Vocabulary CreateVocabulary()
