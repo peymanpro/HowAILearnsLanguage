@@ -84,6 +84,34 @@ public sealed class LanguageModel
         ValidateTokenId(tokenId);
         return _outputEmbeddings[tokenId];
     }
+    public void ApplyGradients(
+        LanguageGradients gradients,
+        IOptimizer optimizer)
+    {
+        ArgumentNullException.ThrowIfNull(gradients);
+        ArgumentNullException.ThrowIfNull(optimizer);
+
+        ValidateTokenId(gradients.TargetTokenId);
+        ValidateTokenId(gradients.ContextTokenId);
+
+        var updatedInput =
+            optimizer.Update(
+                _inputEmbeddings[gradients.TargetTokenId],
+                gradients.InputEmbeddingGradient);
+
+        _inputEmbeddings[gradients.TargetTokenId] =
+            updatedInput;
+
+        for (var tokenId = 0;
+             tokenId < _outputEmbeddings.Length;
+             tokenId++)
+        {
+            _outputEmbeddings[tokenId] =
+                optimizer.Update(
+                    _outputEmbeddings[tokenId],
+                    gradients.OutputEmbeddingGradients[tokenId]);
+        }
+    }
     private void ValidateTokenId(int tokenId)
     {
         if ((uint)tokenId >= (uint)_vocabulary.Count)
@@ -146,4 +174,5 @@ public sealed class LanguageModel
         return exponentials;
     }
 }
+
 
